@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Habitica To-Do Over Dashboard</title>
@@ -7,59 +8,67 @@
     <link rel="stylesheet" type="text/css" href="{% static 'to_do_overs/style.css' %}">
     <link href="//fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">
 </head>
+
 <body>
-<div class="container">
-<h1 id="htdo-title">Habitica To-Do Overs</h1>
+    <div class="container">
+        <h1 id="htdo-title">Habitica To-Do Overs</h1>
 
-{% if messages %}
-  <ul class="messages">
-    {% for message in messages %}
-      <li class="{{ message.tags }}">{{ message }}</li>
-    {% endfor %}
-  </ul>
-{% endif %}
+        {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+            <li class="{{ message.tags }}">{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
 
-Hello {{ username }}!<br /><br />
+        Hello {{ username }}!<br /><br />
 
-Create a new To-Do Over task <a href="{% url 'to_do_overs:create_task' %}">here</a>.
+        Create a new To-Do Over task <a href="{% url 'to_do_overs:create_task' %}">here</a>.
 
-<br />
-<br />
+        <br />
+        <br />
 
-{% if tasks %}
-    The following tasks exist in the ToDoOver database:<br /><br />
-    <table class="u-full-width">
-        <thead>
-            <tr>
-                <th>Task</th>
-                <th>Length (Days)</th>
-                <th>Delay (Days)</th>
-                <th>Difficulty</th>
-                <th>Edit</th>
-                <th>Delete</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for task in tasks %}
-            <tr>
-                <td>{{ task.name }}</td>
-                <td>{{ task.days }}</td>
-                <td>{{ task.delay }}</td>
-                <td>{{ task.get_priority_display }}</td>
-                <td><a href="{% url 'to_do_overs:edit_task' task.pk %}">Edit</a></td>
-                <td><a href="{% url 'to_do_overs:delete_task' task.pk %}">Delete</a></td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-    <br/>
-{% endif %}
-<br />
-For more info on this tool visit the <a href="https://github.com/Kirska/Habitica_ToDoOvers/">GitHub repo.</a>
-<br />
-<br />
-<a href="{% url 'to_do_overs:logout' %}">Log Out</a>
-</div>
+        {% if tasks %}
+        The following tasks exist in the ToDoOver database:<br /><br />
+        <table class="u-full-width">
+            <thead>
+                <tr>
+                    <th>Task</th>
+                    <th>Type</th>
+                    <th>Length (Days)</th>
+                    <th>Delay (Days)</th>
+                    <th>Difficulty</th>
+                    <th>Weekday</th>
+                    <th>Monthday</th>
+                    <th>Edit</th>
+                    <th>Delete</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for task in tasks %}
+                <tr>
+                    <td>{{ task.name }}</td>
+                    <td>{{ task.get_type_display }}</td>
+                    <td>{{ task.days }}</td>
+                    <td>{{ task.delay }}</td>
+                    <td>{{ task.get_priority_display }}</td>
+                    <td>{{ task.get_weekday_display }}</td>
+                    <td>{{ task.monthday }}</td>
+                    <td><a href="{% url 'to_do_overs:edit_task' task.pk %}">Edit</a></td>
+                    <td><a href="{% url 'to_do_overs:delete_task' task.pk %}">Delete</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <br />
+        {% endif %}
+        <br />
+        For more info on this tool visit the <a href="https://github.com/Kirska/Habitica_ToDoOvers/">GitHub repo.</a>
+        <br />
+        <br />
+        <a href="{% url 'to_do_overs:logout' %}">Log Out</a>
+    </div>
 </body>
 <footer></footer>
+
 </html>

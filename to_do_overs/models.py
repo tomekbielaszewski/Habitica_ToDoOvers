@@ -3,6 +3,7 @@
 """
 from __future__ import unicode_literals
 from builtins import str
+from datetime import date
 from django.db import models
 
 
@@ -66,8 +67,32 @@ class Tasks(models.Model):
     priority = models.CharField(
         max_length=3, choices=PRIORITY_CHOICES, blank=False, default=EASY
     )
-    days = models.PositiveIntegerField(default=0)
+    TYPE_CHOICES = (
+        ("0", "Day"),
+        ("1", "Week"),
+        ("2", "Month"),
+    )
+    type = models.CharField(
+        max_length=3, choices=TYPE_CHOICES, blank=False, default="0"
+    )
+    days = models.IntegerField(default=0)
     delay = models.PositiveIntegerField(default=0)
+
+    DAYS_CHOICES = (
+        ("0", "Monday"),
+        ("1", "Tuesday"),
+        ("2", "Wednesday"),
+        ("3", "Thursday"),
+        ("4", "Friday"),
+        ("5", "Saturday"),
+        ("6", "Sunday"),
+    )
+    weekday = models.CharField(
+        max_length=3, choices=DAYS_CHOICES, blank=False, default="0"
+    )
+    monthday = models.CharField(
+        max_length=2, choices=((str(x), str(x)) for x in range(1, 32)), default="0"
+    )
     owner = models.ForeignKey(Users, on_delete=models.CASCADE)
 
     tags = models.ManyToManyField(Tags)

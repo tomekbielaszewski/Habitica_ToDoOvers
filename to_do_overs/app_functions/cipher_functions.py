@@ -61,7 +61,6 @@ def decrypt_text(cipher_text, cipher_file_path=CIPHER_FILE):
         if isinstance(cipher_text, str):
             cipher_text = cipher_text[2:-1]
             cipher_text = bytes(cipher_text, "utf-8")
-        print(cipher_text, "*****#", type(cipher_text))
         plain_text = cipher_suite.decrypt(cipher_text)
         return plain_text
 

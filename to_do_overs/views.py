@@ -66,9 +66,7 @@ def login_api_key(request):
     session_class = ToDoOversData()
 
     session_class.hab_user_id = request.POST.get("user_id", False)
-    session_class.api_token = encrypt_text(
-        request.POST.get("api_token").encode("utf-8")
-    )
+    session_class.api_token = encrypt_text(request.POST.get("api_token"))
 
     if session_class.login_api_key():
         request.session["session_data"] = jsonpickle.encode(session_class)
@@ -153,7 +151,7 @@ def create_task_action(request):
     session_class = jsonpickle.decode(request.session["session_data"])
     if session_class.logged_in:
         form = TasksModelForm(session_class.hab_user_id, request.POST)
-
+        print(form.errors)
         if form.is_valid():
             task = Tasks()
             task.name = form.data["name"]
@@ -161,6 +159,9 @@ def create_task_action(request):
             task.days = form.data["days"]
             task.delay = form.data["delay"]
             task.priority = form.data["priority"]
+            task.type = form.data["type"]
+            task.weekday = form.data["weekday"]
+            task.monthday = form.data["monthday"]
 
             task.notes += "\n\n:repeat:Automatically created by ToDoOvers API tool."
             task.owner = Users.objects.get(user_id=session_class.hab_user_id)
@@ -179,6 +180,9 @@ def create_task_action(request):
             session_class.task_days = task.days
             session_class.task_delay = task.delay
             session_class.priority = task.priority
+            session_class.type = task.type
+            session_class.weekday = task.weekday
+            session_class.monthday = task.monthday
             request.session["session_data"] = jsonpickle.encode(session_class)
 
             if int(session_class.task_days) < 0:
@@ -358,6 +362,9 @@ def edit_task_action(request, task_pk):
             session_class.task_days = task.days
             session_class.task_delay = task.delay
             session_class.priority = task.priority
+            session_class.type = task.type
+            session_class.weekday = task.weekday
+            session_class.monthday = task.monthday
 
             # convert tags from their DB ID to the tag UUID
             tags = request.POST.getlist("tags")
@@ -383,6 +390,9 @@ def edit_task_action(request, task_pk):
                     days=task.days,
                     priority=task.priority,
                     delay=task.delay,
+                    type=task.type,
+                    weekday=task.weekday,
+                    monthday=task.monthday,
                 )
 
                 task_object = Tasks.objects.get(task_id=task.task_id)

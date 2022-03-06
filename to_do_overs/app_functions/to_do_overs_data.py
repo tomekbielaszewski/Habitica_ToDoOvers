@@ -49,6 +49,9 @@ class ToDoOversData(object):
         self.task_delay = 0
         self.task_id = ""
         self.priority = ""
+        self.type = 0
+        self.weekday = 0
+        self.monthday = 0
         self.notes = ""
 
         self.return_code = 0
