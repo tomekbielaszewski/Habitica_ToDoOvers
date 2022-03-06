@@ -5,4 +5,4 @@ from django.apps import AppConfig
 
 
 class ToDoOversConfig(AppConfig):
-    name = 'to_do_overs'
+    name = "to_do_overs"

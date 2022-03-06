@@ -21,7 +21,7 @@ def generate_cipher_key():
     This will make all existing data GARBAGE so use with caution.
     """
     key = Fernet.generate_key()
-    with open(CIPHER_FILE, 'wb') as cipher_file:
+    with open(CIPHER_FILE, "wb") as cipher_file:
         cipher_file.write(key)
 
 
@@ -36,7 +36,7 @@ def encrypt_text(text):
     Returns:
         The encrypted text.
     """
-    with open(CIPHER_FILE, 'rb') as cipher_file:
+    with open(CIPHER_FILE, "rb") as cipher_file:
         key = cipher_file.read()
         cipher_suite = Fernet(key)
         cipher_text = cipher_suite.encrypt(text)
@@ -55,7 +55,7 @@ def decrypt_text(cipher_text, cipher_file_path=CIPHER_FILE):
     Returns:
         The decrypted text.
     """
-    with open(cipher_file_path, 'rb') as cipher_file:
+    with open(cipher_file_path, "rb") as cipher_file:
         key = cipher_file.read()
         cipher_suite = Fernet(key)
         plain_text = cipher_suite.decrypt(cipher_text)
