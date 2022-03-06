@@ -10,6 +10,7 @@ __author__ = "Katie Patterson kirska.com"
 __license__ = "MIT"
 
 from datetime import datetime
+import schedule
 import time
 import pytz
 import requests
@@ -151,71 +152,82 @@ def check_recreate_task(req, task):
         print("task not completed " + task.task_id)
 
 
-TASKS = Tasks.objects.all()
-user_tags_fetched = []
+def job():
+    TASKS = Tasks.objects.all()
+    user_tags_fetched = []
 
-for task_ in TASKS:
-    tdo_data = ToDoOversData()
-
-    too_many_requests_delay = True
-    current_delay = 0
-
-    # update user's tags
-    if task_.owner.user_id not in user_tags_fetched:
-        user_tags_fetched.append(task_.owner.user_id)
-        while too_many_requests_delay:
-            tdo_data.hab_user_id = task_.owner.user_id
-            tdo_data.api_token = task_.owner.api_key
-            if not tdo_data.get_user_tags():
-                if tdo_data.return_code == 429:
-                    # too many requests
-                    current_delay += 90
-                    too_many_requests_delay = True
-                    print("too many requests, sleeping")
-                    if current_delay > 500:
-                        # stop trying
-                        too_many_requests_delay = False
-                        current_delay = 0
-                    else:
-                        time.sleep(current_delay)
-                else:
-                    too_many_requests_delay = False
-                    current_delay = 0
-            else:
-                too_many_requests_delay = False
-                current_delay = 0
+    for task_ in TASKS:
+        tdo_data = ToDoOversData()
 
         too_many_requests_delay = True
         current_delay = 0
 
-    while too_many_requests_delay:
-        url = "https://habitica.com/api/v3/tasks/" + str(task_.task_id)
-        headers = {
-            "x-api-user": str(task_.owner.user_id),
-            "x-api-key": decrypt_text(task_.owner.api_key.encode("utf-8"), CIPHER_FILE),
-        }
+        # update user's tags
+        if task_.owner.user_id not in user_tags_fetched:
+            user_tags_fetched.append(task_.owner.user_id)
+            while too_many_requests_delay:
+                tdo_data.hab_user_id = task_.owner.user_id
+                tdo_data.api_token = task_.owner.api_key
+                if not tdo_data.get_user_tags():
+                    if tdo_data.return_code == 429:
+                        # too many requests
+                        current_delay += 90
+                        too_many_requests_delay = True
+                        print("too many requests, sleeping")
+                        if current_delay > 500:
+                            # stop trying
+                            too_many_requests_delay = False
+                            current_delay = 0
+                        else:
+                            time.sleep(current_delay)
+                    else:
+                        too_many_requests_delay = False
+                        current_delay = 0
+                else:
+                    too_many_requests_delay = False
+                    current_delay = 0
 
-        req_ = requests.get(url, headers=headers)
-
-        if req_.status_code == 429:
-            # too many requests
-            current_delay += 90
             too_many_requests_delay = True
-            print("too many requests, sleeping")
-            if current_delay > 500:
-                # stop trying
+            current_delay = 0
+
+        while too_many_requests_delay:
+            url = "https://habitica.com/api/v3/tasks/" + str(task_.task_id)
+            headers = {
+                "x-api-user": str(task_.owner.user_id),
+                "x-api-key": decrypt_text(task_.owner.api_key, CIPHER_FILE),
+            }
+
+            req_ = requests.get(url, headers=headers)
+
+            if req_.status_code == 429:
+                # too many requests
+                current_delay += 90
+                too_many_requests_delay = True
+                print("too many requests, sleeping")
+                if current_delay > 500:
+                    # stop trying
+                    too_many_requests_delay = False
+                    current_delay = 0
+                else:
+                    time.sleep(current_delay)
+            elif req_.status_code == 200:
+                check_recreate_task(req_, task_)
                 too_many_requests_delay = False
-                current_delay = 0
+            elif req_.status_code == 404:
+                print("deleting task " + task_.task_id)
+                Tasks.objects.filter(task_id=task_.task_id).delete()
+                too_many_requests_delay = False
             else:
-                time.sleep(current_delay)
-        elif req_.status_code == 200:
-            check_recreate_task(req_, task_)
-            too_many_requests_delay = False
-        elif req_.status_code == 404:
-            print("deleting task " + task_.task_id)
-            Tasks.objects.filter(task_id=task_.task_id).delete()
-            too_many_requests_delay = False
-        else:
-            print("weird return code")
-            print(req_.status_code)
-            too_many_requests_delay = False
+                print("weird return code")
+                print(req_.status_code)
+                too_many_requests_delay = False
+
+
+schedule.every().day.at("00:00").do(job)
+tdo_data = None
+# schedule.every(1).minutes.do(job)
+# schedule.every(10).seconds.do(job)
+
+while True:
+    schedule.run_pending()
+    time.sleep(1)  # wait one minute

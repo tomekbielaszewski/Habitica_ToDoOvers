@@ -70,7 +70,7 @@ class ToDoOversData(object):
         if req.status_code == 200:
             req_json = req.json()
             self.hab_user_id = req_json["data"]["id"]
-            self.api_token = encrypt_text(req_json["data"]["apiToken"].encode("utf-8"))
+            self.api_token = encrypt_text(req_json["data"]["apiToken"])
             self.username = req_json["data"]["username"]
 
             Users.objects.update_or_create(
@@ -80,7 +80,6 @@ class ToDoOversData(object):
                     "username": self.username,
                 },
             )
-
             self.logged_in = True
 
             return True
@@ -228,7 +227,6 @@ class ToDoOversData(object):
         Returns:
             Dict of tags for success, False for failure.
         """
-        print(self.api_token)
         headers = {
             "x-api-user": self.hab_user_id.encode("utf-8"),
             "x-api-key": decrypt_text(

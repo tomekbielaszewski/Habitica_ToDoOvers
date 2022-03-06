@@ -39,7 +39,7 @@ def encrypt_text(text):
     with open(CIPHER_FILE, "rb") as cipher_file:
         key = cipher_file.read()
         cipher_suite = Fernet(key)
-        cipher_text = cipher_suite.encrypt(text)
+        cipher_text = cipher_suite.encrypt(bytes(text, "utf-8"))
         return cipher_text
 
 
@@ -58,6 +58,10 @@ def decrypt_text(cipher_text, cipher_file_path=CIPHER_FILE):
     with open(cipher_file_path, "rb") as cipher_file:
         key = cipher_file.read()
         cipher_suite = Fernet(key)
+        if isinstance(cipher_text, str):
+            cipher_text = cipher_text[2:-1]
+            cipher_text = bytes(cipher_text, "utf-8")
+        print(cipher_text, "*****#", type(cipher_text))
         plain_text = cipher_suite.decrypt(cipher_text)
         return plain_text
 
