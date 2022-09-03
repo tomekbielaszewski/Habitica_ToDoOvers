@@ -25,8 +25,20 @@
 
         Create a new To-Do Over task <a href="{% url 'to_do_overs:create_task' %}">here</a>.
 
+
         <br />
         <br />
+
+        <!------------ TMP -->
+        <form action="{% url 'to_do_overs:create_daily_report_action' %}" method="post">
+            {% csrf_token %}
+
+            {{ form.as_p }}
+            <input class="button-primary" type="submit" value="Test Report">
+        </form>
+        <br />
+        <br />
+        <!----------- -->
 
         {% if tasks %}
         The following tasks exist in the ToDoOver database:<br /><br />

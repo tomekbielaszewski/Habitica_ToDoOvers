@@ -7,6 +7,7 @@ from __future__ import absolute_import
 
 from builtins import str
 from builtins import object
+from turtle import update
 
 __author__ = "Katie Patterson kirska.com"
 __license__ = "MIT"
@@ -271,5 +272,205 @@ class ToDoOversData(object):
                     Tags.objects.filter(tag_id=leftover_tag).delete()
 
                 return req_json["data"]
+            return False
+        return False
+
+    def get_user_tasks(self, cipher_file_path=CIPHER_FILE):
+        """Get the list of a user's tasks.
+
+        Returns:
+            Dict of tags for success, False for failure.
+        """
+        headers = {
+            "x-api-user": self.hab_user_id.encode("utf-8"),
+            "x-api-key": decrypt_text(
+                self.api_token,
+                cipher_file_path,
+            ),
+        }
+
+        req = requests.get(
+            "https://habitica.com/api/v3/tasks/user", headers=headers, data={}
+        )
+        self.return_code = req.status_code
+        if req.status_code == 200:
+            req_json = req.json()
+
+            user = Users.objects.get(user_id=self.hab_user_id)
+
+            if req_json["data"]:
+                for tag_json in req_json["data"]:
+                    if tag_json["type"] == "todo":
+                        print(tag_json)
+                    updatedAt = datetime.strptime(
+                        tag_json["updatedAt"], "%Y-%m-%dT%H:%M:%S.%fZ"
+                    )
+
+                    if updatedAt.day == datetime.today().day:
+                        print("TODAY")
+                        if tag_json["type"] == "todo":
+                            print(tag_json)
+                        else:
+                            print(tag_json["text"])
+
+                    if tag_json["type"] == "habit":
+                        pass
+                        # print(
+                        #    tag_json["text"]
+                        # tag_json["updatedAt"],
+                        # )
+
+                        # + reward
+
+                return req_json["data"]
+            return False
+        return False
+
+    def get_today_completed_tasks(self, cipher_file_path=CIPHER_FILE):
+        """Get the list of a user's completed tasks.
+
+        Returns:
+            Dict of tags for success, False for failure.
+        """
+        headers = {
+            "x-api-user": self.hab_user_id.encode("utf-8"),
+            "x-api-key": decrypt_text(
+                self.api_token,
+                cipher_file_path,
+            ),
+        }
+
+        req = requests.get(
+            "https://habitica.com/api/v3/tasks/user?type=completedTodos",
+            headers=headers,
+            data={},
+        )
+        self.return_code = req.status_code
+        if req.status_code == 200:
+            req_json = req.json()
+
+            user = Users.objects.get(user_id=self.hab_user_id)
+            results = []
+            if req_json["data"]:
+                for tag_json in req_json["data"]:
+                    completedAt = datetime.strptime(
+                        tag_json["dateCompleted"], "%Y-%m-%dT%H:%M:%S.%fZ"
+                    )
+                    if (
+                        (completedAt.day == datetime.today().day)
+                        and (completedAt.month == datetime.today().month)
+                        and (completedAt.year == datetime.today().year)
+                        and (tag_json["type"] == "todo")
+                    ):
+                        results.append(tag_json)
+                return results
+            return False
+        return False
+
+    def get_today_completed_habits(self, cipher_file_path=CIPHER_FILE):
+        """Get the list of a user's completed tasks.
+
+        Returns:
+            Dict of tags for success, False for failure.
+        """
+        headers = {
+            "x-api-user": self.hab_user_id.encode("utf-8"),
+            "x-api-key": decrypt_text(
+                self.api_token,
+                cipher_file_path,
+            ),
+        }
+
+        req = requests.get(
+            "https://habitica.com/api/v3/tasks/user?type=habits",
+            headers=headers,
+            data={},
+        )
+        self.return_code = req.status_code
+        if req.status_code == 200:
+            req_json = req.json()
+
+            user = Users.objects.get(user_id=self.hab_user_id)
+            results = []
+            if req_json["data"]:
+                for tag_json in req_json["data"]:
+                    for h in tag_json["history"]:
+                        updatedAt = datetime.fromtimestamp(h["date"] / 1e3)
+                        if (
+                            (updatedAt.day == datetime.today().day)
+                            and (updatedAt.month == datetime.today().month)
+                            and (updatedAt.year == datetime.today().year)
+                        ):
+                            entry = {
+                                key: tag_json[key]
+                                for key in [
+                                    "text",
+                                    "frequency",
+                                    "type",
+                                    "notes",
+                                    "createdAt",
+                                    "counterUp",
+                                    "counterDown",
+                                ]
+                            }
+                            entry["date"] = updatedAt
+                            results.append(entry)
+                return results
+            return False
+        return False
+
+    def get_today_completed_dailies(self, cipher_file_path=CIPHER_FILE):
+        """Get the list of a user's completed tasks.
+
+        Returns:
+            Dict of tags for success, False for failure.
+        """
+        headers = {
+            "x-api-user": self.hab_user_id.encode("utf-8"),
+            "x-api-key": decrypt_text(
+                self.api_token,
+                cipher_file_path,
+            ),
+        }
+
+        req = requests.get(
+            "https://habitica.com/api/v3/tasks/user?type=dailys",
+            headers=headers,
+            data={},
+        )
+        self.return_code = req.status_code
+        if req.status_code == 200:
+            req_json = req.json()
+            results = []
+            if req_json["data"]:
+                for tag_json in req_json["data"]:
+                    duplicat_check = []
+                    for h in tag_json["history"]:
+                        updatedAt = datetime.fromtimestamp(h["date"] / 1e3)
+                        if (
+                            (updatedAt.day == datetime.today().day)
+                            and (updatedAt.month == datetime.today().month)
+                            and (updatedAt.year == datetime.today().year)
+                            and (h["isDue"] == True)
+                            and (h["completed"] == True)
+                            and (tag_json["text"] not in duplicat_check)
+                        ):
+                            results.append(
+                                {
+                                    key: tag_json[key]
+                                    for key in [
+                                        "text",
+                                        "frequency",
+                                        "type",
+                                        "notes",
+                                        "createdAt",
+                                        "repeat",
+                                        "everyX",
+                                        "streak",
+                                    ]
+                                }
+                            )
+                            duplicat_check.append(tag_json["text"])
+                return results
             return False
         return False

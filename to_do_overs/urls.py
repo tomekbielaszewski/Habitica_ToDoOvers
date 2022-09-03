@@ -12,6 +12,11 @@ urlpatterns = [
     url(r"^dashboard/$", views.dashboard, name="dashboard"),
     url(r"^create_task/$", views.create_task, name="create_task"),
     url(r"^create_task_action/$", views.create_task_action, name="create_task_action"),
+    url(
+        r"^create_daily_report_action/$",
+        views.create_daily_report_action,
+        name="create_daily_report_action",
+    ),
     url(r"^logout/$", views.logout, name="logout"),
     url(r"^delete_task/(?P<task_pk>[-\w]+)/$", views.delete_task, name="delete_task"),
     url(

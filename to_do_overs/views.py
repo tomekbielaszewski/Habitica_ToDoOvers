@@ -13,6 +13,7 @@ import jsonpickle
 from .app_functions.cipher_functions import encrypt_text
 from django.http import HttpResponseServerError
 import json
+from datetime import datetime
 
 
 def index(request):
@@ -209,6 +210,26 @@ def create_task_action(request):
     else:
         messages.warning(request, "You need to log in to view that page.")
         return redirect("to_do_overs:index")
+
+
+def create_daily_report_action(request):
+    session_class = jsonpickle.decode(request.session["session_data"])
+    if session_class.logged_in:
+        todo_results = session_class.get_today_completed_tasks()
+        habit_results = session_class.get_today_completed_habits()
+        daily_results = session_class.get_today_completed_dailies()
+        date_today = (
+            f"{datetime.today().year}{datetime.today().month}{datetime.today().day}"
+        )
+        results = {
+            "date": date_today,
+            "habits": habit_results,
+            "dailys": daily_results,
+            "todos": todo_results,
+        }
+        with open("reports/" + date_today + ".txt", "w") as f:
+            json.dump(results, f, default=str)
+    return dashboard(request)
 
 
 def logout(request):
