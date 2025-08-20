@@ -1,22 +1,21 @@
 # Habitica To-Do Overs
+
 The Habitica To-Do Overs project is an API tool created for [Habitica](https://habitica.com).
-The tool is currently running at [this link](https://kirska.pythonanywhere.com). You can go there to actually use the tool.
+
 ### What is a To-Do Over?
-A To-Do Over is a To-Do task that automatically repeats upon completion.
 
-As an example, say you need to do laundry once a week, but you don't care what day of the week it gets done, and you'll need to do it every week. 
+A To-Do Over is a To-Do task that automatically repeats upon completion.  
+As an example, say you need to do laundry once a week, but you don't care what day of the week it gets done, and you'll need to do it every week.  
 
-Enter To-Do Overs. 
-
-You can create a To-Do Over task with a length of 7 days, and you can mark it complete anytime in that 7 day period, and when you do, the tool will automatically create a new to-do for laundry with 7 days from THAT date.
-
+#### Enter To-Do Overs!
+You can create a To-Do Over task with a length of 7 days, and you can mark it complete anytime in that 7 day period, and when you do, the tool will automatically create a new to-do for laundry with 7 days from THAT date.  
 *You can also create a task without a due date, and it will simply be recreated once it's marked completed.*
-
 You can also delay the re-creation of your task by a desired number of days.
-
 Other than that, the tasks work exactly like the [built-in to-do tasks in Habitica](https://habitica.wikia.com/wiki/To-Dos).
+
 ### Creator
 The tool was built in Django (Python) by [Kirska](https://github.com/Kirska). This tool is in no way affiliated with Habitica.
+
 ## FAQ
 * When is the tool run?
     * The script is run daily. It may take up to a day for your new tasks to appear on Habitica once you complete one.
@@ -28,7 +27,31 @@ The tool was built in Django (Python) by [Kirska](https://github.com/Kirska). Th
     * The tool is a pretty standard Django app, with a scheduled Python script. If you'd like to run it on your local machine and not put your data on the interwebs, feel free to do so.
 * Can I get rid of that note that says "Automatically created by..."?
     * Yes, if you edit your task on the tool you can get rid of that note.
+
+## Build and run
+
+```shell
+docker build -t habitica-todo-overs .
+```
+
+```shell
+docker run -p 8080:8080 -e PORT=8080 -e SECRET_KEY="my-very-secret-key" -e DEBUG="True" -e ALLOWED_HOST_1="127.0.0.1" -e ALLOWED_HOST_2="habitica-todoovers.grizwold.com" habitica-todo-overs
+```
+
+```shell
+docker tag habitica-todo-overs tomekbielaszewski/habitica-todo-overs:latest
+```
+
+```shell
+docker login
+```
+
+```shell
+docker push tomekbielaszewski/habitica-todo-overs:latest
+```
+
 ## Ideas
+
 Here are some ideas for positive habits you can use this tool for:
 * Cleaning a room of your home (your bedroom, the kitchen, etc.)
 * Doing laundry
@@ -37,15 +60,3 @@ Here are some ideas for positive habits you can use this tool for:
 * Calling your parents
 * Buying groceries
 * Leg day at the gym
-## Issues, Bugs, and Suggestions
-If you have any problems or suggestions please open an issue here or contact Kirska. Pull requests are also welcome.
-## Release Notes
-2/17/19 - Added ability to delay the re-creation of tasks.
-
-4/27/19 - Added tags
-
-5/14/19 - Finalized some bug fixes with the tags feature
-
-9/24/19 - Fixed a bug causing an error on login occasionally
-
-12/29/20 - Not really doing releases anymore, as an update. Lots of small bug fixes happening.
