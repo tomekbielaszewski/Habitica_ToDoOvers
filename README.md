@@ -35,7 +35,15 @@ docker build -t habitica-todo-overs .
 ```
 
 ```shell
-docker run -p 8080:8080 -e PORT=8080 -e SECRET_KEY="my-very-secret-key" -e DEBUG="True" -e ALLOWED_HOST_1="127.0.0.1" -e ALLOWED_HOST_2="habitica-todoovers.grizwold.com" habitica-todo-overs
+docker run \
+  -p 8080:8080 \
+  --mount type=bind,source=./data,target=/usr/src/data \
+  -e PORT=8080 \
+  -e SECRET_KEY="my-very-secret-key" \
+  -e DEBUG="True" \
+  -e ALLOWED_HOST_1="127.0.0.1" \
+  -e ALLOWED_HOST_2="habitica-todoovers.grizwold.com" \
+  habitica-todo-overs
 ```
 
 ```shell
