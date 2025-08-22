@@ -8,8 +8,12 @@ from __future__ import absolute_import
 __author__ = "Katie Patterson kirska.com"
 __license__ = "MIT"
 
+import os
+import sys
+
 # import argparse
 from cryptography.fernet import Fernet
+
 from .local_defines import CIPHER_FILE
 
 
@@ -80,17 +84,17 @@ def test_cipher(test_text):
     print(plain_text)
 
 
-"""
-parser = argparse.ArgumentParser(description='Generate a cipher.')
-parser.add_argument('--generate', action='store_true',
-                    help='generate a new cipher' +
-                    'and store in a file USE WITH CAUTION')
-parser.add_argument('--test', help='test your existing cipher')
+def ensure_cipher_file(path):
+    """Ensure cipher.bin exists."""
+    path = os.path.abspath(path)
 
-args = parser.parse_args()
+    if not os.path.isfile(path):
+        sys.stderr.write(
+            "⚠️ Required cipher file not found: " + path + "\n"
+        )
+        generate_cipher_key()
+        print("✅ New cipher file generated!\n")
 
-if args.generate:
-    generate_cipher_key()
-elif args.test:
-    test_cipher(args.test)
-"""
+    print("✅ Cipher file found in bind-mounted directory: " + path + "\n")
+
+ensure_cipher_file(CIPHER_FILE)
