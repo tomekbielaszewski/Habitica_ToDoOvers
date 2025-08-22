@@ -10,6 +10,9 @@ ENV PORT=8000
 ENV ALLOWED_HOST_1="127.0.0.1"
 ENV ALLOWED_HOST_2="todoovers-habitica.grizwold.com"
 
+# database and cipher file directory
+RUN mkdir -p /usr/src/data
+
 WORKDIR /usr/src/app
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt

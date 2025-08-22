@@ -76,7 +76,7 @@ WSGI_APPLICATION = "Habitica_ToDoOvers.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": "mydatabase",
+        "NAME": "/usr/src/data/database",
     }
 }
 
