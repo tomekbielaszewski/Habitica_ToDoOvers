@@ -33,10 +33,10 @@ class Tags(models.Model):
     tag_owner = models.ForeignKey(Users, on_delete=models.CASCADE)
 
     def __str__(self):
-        return self.tag_text.decode("unicode_escape")
+        return self.tag_text
 
     def __unicode__(self):
-        return self.tag_text.decode("unicode_escape")
+        return self.tag_text
 
 
 class Tasks(models.Model):

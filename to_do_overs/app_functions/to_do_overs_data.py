@@ -5,9 +5,8 @@ For functions that don't fit in the model or views.
 """
 from __future__ import absolute_import
 
-from builtins import str
 from builtins import object
-from turtle import update
+from builtins import str
 
 __author__ = "Katie Patterson kirska.com"
 __license__ = "MIT"
@@ -15,7 +14,7 @@ __license__ = "MIT"
 from datetime import datetime, timedelta
 import requests
 from to_do_overs.models import Users, Tags
-from .cipher_functions import encrypt_text, decrypt_text, CIPHER_FILE
+from .cipher_functions import encrypt_text, decrypt_text
 
 
 class ToDoOversData(object):
@@ -70,6 +69,7 @@ class ToDoOversData(object):
             "https://habitica.com/api/v3/user/auth/local/login",
             data={"username": self.username, "password": password},
         )
+        # print("POST: " + req.url + " [" + str(req.status_code) + "]: " + req.text)
         self.return_code = req.status_code
         if req.status_code == 200:
             req_json = req.json()
@@ -97,12 +97,14 @@ class ToDoOversData(object):
             True for success, False for failure.
         """
         headers = {
-            "x-api-user": self.hab_user_id.encode("utf-8"),
+            "x-client": self.hab_user_id + "-TODO-Overs",
+            "x-api-user": self.hab_user_id,
             "x-api-key": decrypt_text(self.api_token),
             "Content-Type": "application/json",
         }
 
         req = requests.get("https://habitica.com/api/v3/user", headers=headers)
+        # print("GET: " + req.url + " [" + str(req.status_code) + "]: " + req.text)
         self.return_code = req.status_code
         if req.status_code == 200:
             req_json = req.json()
@@ -121,15 +123,16 @@ class ToDoOversData(object):
             return True
         return False
 
-    def create_task(self, cipher_file_path=CIPHER_FILE):
+    def create_task(self):
         """Create a task on Habitica.
 
         Returns:
             True for success, False for failure.
         """
         headers = {
-            "x-api-user": self.hab_user_id.encode("utf-8"),
-            "x-api-key": decrypt_text(self.api_token, cipher_file_path),
+            "x-client": self.hab_user_id + "-TODO-Overs",
+            "x-api-user": self.hab_user_id,
+            "x-api-key": decrypt_text(self.api_token),
         }
 
         if int(self.task_days) > 0:
@@ -148,6 +151,7 @@ class ToDoOversData(object):
                     "tags": self.tags,
                 },
             )
+            # print("POST: " + req.url + " [" + str(req.status_code) + "]: " + req.text)
             self.return_code = req.status_code
             if req.status_code == 201:
                 req_json = req.json()
@@ -166,6 +170,7 @@ class ToDoOversData(object):
                     "tags": self.tags,
                 },
             )
+            # print("POST: " + req.url + " [" + str(req.status_code) + "]: " + req.text)
             self.return_code = req.status_code
             if req.status_code == 201:
                 req_json = req.json()
@@ -180,7 +185,8 @@ class ToDoOversData(object):
             True for success, False for failure.
         """
         headers = {
-            "x-api-user": self.hab_user_id.encode("utf-8"),
+            "x-client": self.hab_user_id + "-TODO-Overs",
+            "x-api-user": self.hab_user_id,
             "x-api-key": decrypt_text(self.api_token),
         }
         url = "https://habitica.com/api/v3/tasks/" + str(self.task_id)
@@ -200,6 +206,7 @@ class ToDoOversData(object):
                     "tags": self.tags,
                 },
             )
+            # print("PUT: " + req.url + " [" + str(req.status_code) + "]: " + req.text)
             self.return_code = req.status_code
             if req.status_code == 200:
                 req_json = req.json()
@@ -217,6 +224,7 @@ class ToDoOversData(object):
                     "tags": self.tags,
                 },
             )
+            # print("PUT: " + req.url + " [" + str(req.status_code) + "]: " + req.text)
             self.return_code = req.status_code
             if req.status_code == 200:
                 req_json = req.json()
@@ -225,21 +233,20 @@ class ToDoOversData(object):
             else:
                 return False
 
-    def get_user_tags(self, cipher_file_path=CIPHER_FILE):
+    def get_user_tags(self):
         """Get the list of a user's tags.
 
         Returns:
             Dict of tags for success, False for failure.
         """
         headers = {
-            "x-api-user": self.hab_user_id.encode("utf-8"),
-            "x-api-key": decrypt_text(
-                self.api_token,
-                cipher_file_path,
-            ),
+            "x-client": self.hab_user_id + "-TODO-Overs",
+            "x-api-user": self.hab_user_id,
+            "x-api-key": decrypt_text(self.api_token),
         }
 
         req = requests.get("https://habitica.com/api/v3/tags", headers=headers, data={})
+        # print("GET: " + req.url + " [" + str(req.status_code) + "]: " + req.text)
         self.return_code = req.status_code
         if req.status_code == 200:
             req_json = req.json()
@@ -255,13 +262,13 @@ class ToDoOversData(object):
                 # Add/update tags in database
                 for tag_json in req_json["data"]:
                     tag_text = tag_json["name"]
-                    tag_text = tag_text.encode("unicode_escape")
+                    tag_text = tag_text
 
                     Tags.objects.update_or_create(
-                        tag_id=tag_json["id"].encode("utf-8"),
+                        tag_id=tag_json["id"],
                         defaults={
                             "tag_owner": user,
-                            "tag_text": tag_text.encode("utf-8"),
+                            "tag_text": tag_text,
                         },
                     )
                     if tag_json["id"] in current_tag_ids:
@@ -275,23 +282,22 @@ class ToDoOversData(object):
             return False
         return False
 
-    def get_user_tasks(self, cipher_file_path=CIPHER_FILE):
+    def get_user_tasks(self):
         """Get the list of a user's tasks.
 
         Returns:
             Dict of tags for success, False for failure.
         """
         headers = {
-            "x-api-user": self.hab_user_id.encode("utf-8"),
-            "x-api-key": decrypt_text(
-                self.api_token,
-                cipher_file_path,
-            ),
+            "x-client": self.hab_user_id + "-TODO-Overs",
+            "x-api-user": self.hab_user_id,
+            "x-api-key": decrypt_text(self.api_token),
         }
 
         req = requests.get(
             "https://habitica.com/api/v3/tasks/user", headers=headers, data={}
         )
+        # print("GET: " + req.url + " [" + str(req.status_code) + "]: " + req.text)
         self.return_code = req.status_code
         if req.status_code == 200:
             req_json = req.json()
@@ -326,18 +332,16 @@ class ToDoOversData(object):
             return False
         return False
 
-    def get_today_completed_tasks(self, cipher_file_path=CIPHER_FILE):
+    def get_today_completed_tasks(self):
         """Get the list of a user's completed tasks.
 
         Returns:
             Dict of tags for success, False for failure.
         """
         headers = {
-            "x-api-user": self.hab_user_id.encode("utf-8"),
-            "x-api-key": decrypt_text(
-                self.api_token,
-                cipher_file_path,
-            ),
+            "x-client": self.hab_user_id + "-TODO-Overs",
+            "x-api-user": self.hab_user_id,
+            "x-api-key": decrypt_text(self.api_token),
         }
 
         req = requests.get(
@@ -345,6 +349,7 @@ class ToDoOversData(object):
             headers=headers,
             data={},
         )
+        # print("GET: " + req.url + " [" + str(req.status_code) + "]: " + req.text)
         self.return_code = req.status_code
         if req.status_code == 200:
             req_json = req.json()
@@ -357,28 +362,26 @@ class ToDoOversData(object):
                         tag_json["dateCompleted"], "%Y-%m-%dT%H:%M:%S.%fZ"
                     )
                     if (
-                        (completedAt.day == datetime.today().day)
-                        and (completedAt.month == datetime.today().month)
-                        and (completedAt.year == datetime.today().year)
-                        and (tag_json["type"] == "todo")
+                            (completedAt.day == datetime.today().day)
+                            and (completedAt.month == datetime.today().month)
+                            and (completedAt.year == datetime.today().year)
+                            and (tag_json["type"] == "todo")
                     ):
                         results.append(tag_json)
                 return results
             return False
         return False
 
-    def get_today_completed_habits(self, cipher_file_path=CIPHER_FILE):
+    def get_today_completed_habits(self):
         """Get the list of a user's completed tasks.
 
         Returns:
             Dict of tags for success, False for failure.
         """
         headers = {
-            "x-api-user": self.hab_user_id.encode("utf-8"),
-            "x-api-key": decrypt_text(
-                self.api_token,
-                cipher_file_path,
-            ),
+            "x-client": self.hab_user_id + "-TODO-Overs",
+            "x-api-user": self.hab_user_id,
+            "x-api-key": decrypt_text(self.api_token),
         }
 
         req = requests.get(
@@ -386,6 +389,7 @@ class ToDoOversData(object):
             headers=headers,
             data={},
         )
+        # print("GET: " + req.url + " [" + str(req.status_code) + "]: " + req.text)
         self.return_code = req.status_code
         if req.status_code == 200:
             req_json = req.json()
@@ -397,9 +401,9 @@ class ToDoOversData(object):
                     for h in tag_json["history"]:
                         updatedAt = datetime.fromtimestamp(h["date"] / 1e3)
                         if (
-                            (updatedAt.day == datetime.today().day)
-                            and (updatedAt.month == datetime.today().month)
-                            and (updatedAt.year == datetime.today().year)
+                                (updatedAt.day == datetime.today().day)
+                                and (updatedAt.month == datetime.today().month)
+                                and (updatedAt.year == datetime.today().year)
                         ):
                             entry = {
                                 key: tag_json[key]
@@ -419,18 +423,16 @@ class ToDoOversData(object):
             return False
         return False
 
-    def get_today_completed_dailies(self, cipher_file_path=CIPHER_FILE):
+    def get_today_completed_dailies(self):
         """Get the list of a user's completed tasks.
 
         Returns:
             Dict of tags for success, False for failure.
         """
         headers = {
-            "x-api-user": self.hab_user_id.encode("utf-8"),
-            "x-api-key": decrypt_text(
-                self.api_token,
-                cipher_file_path,
-            ),
+            "x-client": self.hab_user_id + "-TODO-Overs",
+            "x-api-user": self.hab_user_id,
+            "x-api-key": decrypt_text(self.api_token),
         }
 
         req = requests.get(
@@ -438,6 +440,7 @@ class ToDoOversData(object):
             headers=headers,
             data={},
         )
+        # print("GET: " + req.url + " [" + str(req.status_code) + "]: " + req.text)
         self.return_code = req.status_code
         if req.status_code == 200:
             req_json = req.json()
@@ -448,26 +451,26 @@ class ToDoOversData(object):
                     for h in tag_json["history"]:
                         updatedAt = datetime.fromtimestamp(h["date"] / 1e3)
                         if (
-                            (updatedAt.day == datetime.today().day)
-                            and (updatedAt.month == datetime.today().month)
-                            and (updatedAt.year == datetime.today().year)
-                            and (h["isDue"] == True)
-                            and (h["completed"] == True)
-                            and (tag_json["text"] not in duplicat_check)
+                                (updatedAt.day == datetime.today().day)
+                                and (updatedAt.month == datetime.today().month)
+                                and (updatedAt.year == datetime.today().year)
+                                and (h["isDue"] == True)
+                                and (h["completed"] == True)
+                                and (tag_json["text"] not in duplicat_check)
                         ):
                             results.append(
                                 {
                                     key: tag_json[key]
                                     for key in [
-                                        "text",
-                                        "frequency",
-                                        "type",
-                                        "notes",
-                                        "createdAt",
-                                        "repeat",
-                                        "everyX",
-                                        "streak",
-                                    ]
+                                    "text",
+                                    "frequency",
+                                    "type",
+                                    "notes",
+                                    "createdAt",
+                                    "repeat",
+                                    "everyX",
+                                    "streak",
+                                ]
                                 }
                             )
                             duplicat_check.append(tag_json["text"])
