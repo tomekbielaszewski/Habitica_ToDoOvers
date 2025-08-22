@@ -30,6 +30,8 @@ The tool was built in Django (Python) by [Kirska](https://github.com/Kirska). Th
 
 ## Build and run
 
+### Docker
+
 ```shell
 docker build -t habitica-todo-overs .
 ```
@@ -41,8 +43,7 @@ docker run \
   -e PORT=8080 \
   -e SECRET_KEY="my-very-secret-key" \
   -e DEBUG="True" \
-  -e ALLOWED_HOST_1="127.0.0.1" \
-  -e ALLOWED_HOST_2="habitica-todoovers.grizwold.com" \
+  -e ALLOWED_HOSTS="127.0.0.1,localhost" \
   habitica-todo-overs
 ```
 
@@ -56,6 +57,12 @@ docker login
 
 ```shell
 docker push tomekbielaszewski/habitica-todo-overs:latest
+```
+
+### Docker compose
+
+```
+
 ```
 
 ## Ideas

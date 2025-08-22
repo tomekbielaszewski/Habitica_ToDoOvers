@@ -7,8 +7,7 @@ ENV CRYPTOGRAPHY_DONT_BUILD_RUST=1
 ENV SECRET_KEY="!tsyo30sxj#y1moxv40_z-%sridupa0paiow-e)emci9jlwjq*#"
 ENV DEBUG="True"
 ENV PORT=8000
-ENV ALLOWED_HOST_1="127.0.0.1"
-ENV ALLOWED_HOST_2="todoovers-habitica.grizwold.com"
+ENV ALLOWED_HOSTS="127.0.0.1,localhost"
 
 # database and cipher file directory
 RUN mkdir -p /usr/src/data
