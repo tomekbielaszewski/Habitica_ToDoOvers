@@ -4,3 +4,4 @@ jsonpickle
 requests
 schedule
 pytz
+whitenoise
