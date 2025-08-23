@@ -62,7 +62,18 @@ docker push tomekbielaszewski/habitica-todo-overs:latest
 ### Docker compose
 
 ```
-
+services:
+  habitica-todo-overs:
+    container_name: habitica-todo-overs
+    image: tomekbielaszewski/habitica-todo-overs:latest
+    restart: unless-stopped
+    volumes:
+      - /home/tomek/habitica/todoovers:/usr/src/data
+    environment:
+      - PORT=8000
+      - SECRET_KEY=some_secret_value
+      - DEBUG=False
+      - ALLOWED_HOSTS=todo-overs-habitica.example.com,172.18.0.0/24,localhost
 ```
 
 ## Ideas
